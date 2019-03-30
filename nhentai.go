@@ -13,7 +13,7 @@ import (
 
 //Search - Search for a term on nHentai and return results
 func Search(query string, page int) (*SearchResponse, error) {
-	requrl := strings.ReplaceAll(query, " ", "+")
+	requrl := strings.Replace(query, " ", "+", -1)
 	requrl = url.QueryEscape(requrl)
 	requrl = "https://nhentai.net/search?q=" + requrl + "&page=" + strconv.Itoa(page)
 
@@ -133,7 +133,7 @@ func Get(id int) (*Doujinshi, error) {
 
 	for _, v := range tagA {
 		href := v.Attrs()["href"]
-		tag := strings.ReplaceAll(strings.Split(href, "/")[2], "-", " ")
+		tag := strings.Replace(strings.Split(href, "/")[2], "-", " ", -1)
 		doujinshi.Tags = append(doujinshi.Tags, tag)
 	}
 
@@ -157,7 +157,7 @@ func Get(id int) (*Doujinshi, error) {
 //Tag - Search for a tag on nHentai and return results
 func Tag(query string, page int) (*SearchResponse, error) {
 	query = strings.ToLower(query)
-	requrl := strings.ReplaceAll(query, " ", "-")
+	requrl := strings.Replace(query, " ", "-", -1)
 	requrl = url.QueryEscape(requrl)
 	requrl = "https://nhentai.net/tag/" + requrl + "?page=" + strconv.Itoa(page)
 
