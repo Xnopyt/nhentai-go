@@ -1,5 +1,5 @@
 //
-//nHentai-go - A web scrapping library for pulling doujinshi from nhentai after the public api was taken down.
+//nHentai-go - A web scraping library for pulling doujinshi from nhentai after the public api was taken down.
 //Provides the ability to search based on keyword, tag or id, with id providing full infomation about the doujinshi.
 package nhentai
 
