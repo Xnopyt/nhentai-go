@@ -5,7 +5,6 @@ package nhentai
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -21,7 +20,6 @@ func init() {
 	exts["j"] = ".jpg"
 	exts["p"] = ".png"
 	exts["g"] = ".gif"
-	fmt.Println("test")
 }
 
 //Search - Search for a term on nHentai and return results
