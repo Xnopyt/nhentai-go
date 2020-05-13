@@ -22,17 +22,11 @@ func init() {
 	exts["g"] = ".gif"
 }
 
-//Search - Search for a term on nHentai and return results
-func Search(query string, page int) (*SearchResponse, error) {
-	requrl := strings.Replace(query, " ", "+", -1)
-	requrl = url.QueryEscape(requrl)
-	requrl = "https://nhentai.net/api/galleries/search?q=" + requrl + "&page=" + strconv.Itoa(page)
-
+func httpGet(url string) (r []byte, code int, err error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", requrl, nil)
-
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	req.Header.Set("User-Agent", "Xnopyts_nHentai_Scraper/0.1")
@@ -40,11 +34,26 @@ func Search(query string, page int) (*SearchResponse, error) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return body, resp.StatusCode, nil
+}
+
+//Search - Search for a term on nHentai and return results
+func Search(query string, page int) (*SearchResponse, error) {
+	requrl := strings.Replace(query, " ", "+", -1)
+	requrl = url.QueryEscape(requrl)
+	requrl = "https://nhentai.net/api/galleries/search?q=" + requrl + "&page=" + strconv.Itoa(page)
+
+	body, _, err := httpGet(requrl)
 
 	if err != nil {
 		return nil, err
@@ -76,30 +85,14 @@ func Search(query string, page int) (*SearchResponse, error) {
 func Get(id int) (*Doujinshi, error) {
 	requrl := "https://nhentai.net/api/gallery/" + strconv.Itoa(id)
 
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", requrl, nil)
+	body, status, err := httpGet(requrl)
 
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", "Xnopyts_nHentai_Scraper/0.1")
-
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
+	if status != 200 {
 		return nil, errors.New("could not find a result for the given id")
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
 	}
 
 	var result doujinshiJSON
@@ -134,23 +127,7 @@ func Tag(query string, page int) (*SearchResponse, error) {
 	requrl = url.QueryEscape(requrl)
 	requrl = "https://nhentai.net/tag/" + requrl
 
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", requrl, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "Xnopyts_nHentai_Scraper/0.1")
-
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, _, err := httpGet(requrl)
 
 	if err != nil {
 		return nil, err
@@ -160,22 +137,11 @@ func Tag(query string, page int) (*SearchResponse, error) {
 	tagURL := string(furl.Find(body))
 
 	tagURL = "https://nhentai.net/api/gallery/" + tagURL[9:len(tagURL)-2]
-	req, err = http.NewRequest("GET", tagURL, nil)
+	body, _, err = httpGet(tagURL)
 
 	if err != nil {
 		return nil, err
 	}
-
-	req.Header.Set("User-Agent", "Xnopyts_nHentai_Scraper/0.1")
-
-	resp, err = client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
 
 	var tagIDs tagJSON
 	var tagID string
@@ -193,22 +159,7 @@ func Tag(query string, page int) (*SearchResponse, error) {
 
 	requrl = "https://nhentai.net/api/galleries/tagged?tag_id=" + tagID + "&page=" + strconv.Itoa(page)
 
-	req, err = http.NewRequest("GET", requrl, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "Xnopyts_nHentai_Scraper/0.1")
-
-	resp, err = client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
+	body, _, err = httpGet(requrl)
 
 	if err != nil {
 		return nil, err
